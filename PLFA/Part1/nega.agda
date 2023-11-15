@@ -1,0 +1,75 @@
+module nega where
+
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Data.Nat using (ℕ; zero; suc)
+open import Data.Empty using (⊥; ⊥-elim)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Product using (_×_)
+open import Iso using (_≃_; extensionality)
+
+¬_ : Set → Set
+¬ A = A → ⊥
+
+¬-elim : ∀ {A : Set}
+ → ¬ A
+ → A
+ → ⊥
+¬-elim ¬x x = ¬x x
+
+¬¬-intro : ∀ {A : Set}
+ → A
+ → ¬ ¬ A
+¬¬-intro x = λ{¬x → ¬x x } 
+
+¬¬-intro' : ∀ { A : Set }
+ → A
+ → ¬ ¬ A
+¬¬-intro' x ¬x = ¬x x
+
+¬¬¬-elim : ∀ {A : Set}
+ → ¬ ¬ ¬ A
+ → ¬ A
+¬¬¬-elim ¬¬¬x = λ x → ¬¬¬x (¬¬-intro x)
+
+
+contraposition : ∀ { A B : Set}
+ → ( A → B)
+ → (¬ B → ¬ A)
+contraposition f ¬y x = ¬y (f x )
+
+_≢_ : ∀ {A : Set} → A → A → Set
+x ≢ y = ¬ (x ≡ y)
+
+_ : 1 ≢ 2
+_ = λ()
+
+peano : ∀ { m : ℕ} → zero ≢ suc m
+peano = λ()
+
+id : ⊥ → ⊥
+id x = x
+
+id' : ⊥ → ⊥
+id' ()
+
+id≡id' : id ≡ id'
+id≡id' = extensionality (λ x → ⊥-elim x) --(λ()) --(λ x → refl) 
+
+assimilation : ∀ {A : Set} (¬x ¬x' : ¬ A) → ¬x ≡ ¬x'
+assimilation ¬x ¬x' = extensionality (λ x → ⊥-elim (¬x x))
+
+
+postulate
+  em : ∀ {A : Set} → A ⊎ ¬ A
+
+em-irrefutable : ∀ {A : Set} → ¬ ¬ (A ⊎ ¬ A) -- u+ , U+
+em-irrefutable = λ x → x ? --(inj₂(λ k → x (inj₁ k)))
+
+kd : {a b : ℕ } → a ⊔ b → a
+kd ab = ? 
+
+{-
+lemma : ∀ {n m : ℕ} → n ≢ m →  n ≡ m
+lemma x = ⊥-elim (¬-elim (x) (lemma x))
+lemma x = ¬-elim ? ?
+-}
