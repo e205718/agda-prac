@@ -3,10 +3,13 @@ module lub where
 open import Data.Nat hiding ( _⊔_ )
 open import Relation.Binary.PropositionalEquality
 open import Relation.Binary
-open import Data.Empty using (⊥; ⊥-elim)
+open import Data.Empty --using (⊥; ⊥-elim)
+open import Data.Nat.Properties
+open import Relation.Nullary.Negation
 
-¬_ : Set → Set
-¬ A = A → ⊥
+
+--¬_ : Set → Set
+--¬ A = A → ⊥
 
 ¬-elim : ∀ {A : Set}
   → ¬ A
@@ -52,7 +55,7 @@ notZeroSuc2 : {n : ℕ} → ¬ (suc n ≡ zero)
 notZeroSuc2 ()
 
 l→⊥ : {n : ℕ} → ¬ (suc n ≡ zero) → ⊥
-l→⊥ = ?
+l→⊥ = {!!}
 
 {-
 pro1 : {m n : ℕ} → m ≡ n → ⊥
@@ -61,14 +64,45 @@ pro1 = {!!}
 pro2 : {m n : ℕ} → ¬ (m ≡ n)
 pro2 m n = {!!}
 -}
+sm : {m n : ℕ} → suc m ≡ suc n → m ≡ n
+sm refl = refl
+
+
+pro1 : { m : ℕ } → zero ≡ suc m → ⊥
+pro1 ()
+
+pro2 : {m : ℕ } → suc m ≡ zero → ⊥ 
+pro2 ()
+
+notSucZero : ∀ {n} → ¬ suc n ≡ 0
+notSucZero contra with 1+n≢0 contra
+... | ()
+
+sucNotZero : ∀ {n : ℕ } → suc n ≢ zero
+sucNotZero = λ ()
+
 
 kl : ( l m n : ℕ ) →  m ≡ n → l ≡ m ⊔ n
 kl zero zero zero x = refl 
-kl zero zero (suc n)  x = ⊥-elim (¬-elim (notZeroSuc1) x) 
-kl zero (suc m) zero x = ⊥-elim (¬-elim (notZeroSuc2) x)
-kl zero (suc m) (suc n) x = {!!}
-kl (suc l) zero zero x = ⊥-elim (l→⊥ ({!!}) (notZeroSuc2)) -- (¬-elim (refl) x)
-kl (suc l) zero (suc n) x = {!!} -- if l= n
-kl (suc l) (suc m) zero  x = {!!}
-kl (suc l) (suc m) (suc n) x = cong suc (kl l m n {!!})
+kl zero zero (suc n)  x = ⊥-elim (notZeroSuc1 x) 
+kl zero (suc m) zero x = ⊥-elim (notZeroSuc2 x)
+kl zero (suc m) (suc n) x = ⊥-elim (pro2 ( sym (kl zero (suc m) (suc n) x)))
+kl (suc l) zero zero x = ⊥-elim (pro2 (kl (suc l) zero zero x))
+kl (suc l) zero (suc n) x with <-cmp (suc l) (suc n)
+... | tri< a ¬b ¬c = ⊥-elim (¬b (kl (suc l) zero (suc n) x))
+... | tri≈ ¬a b ¬c = cong suc (sm b)
+... | tri> ¬a ¬b c = ⊥-elim (¬b (kl (suc l) zero (suc n) x))
+kl (suc l) (suc m) zero  x with <-cmp (suc l) (suc m)
+... | tri< a ¬b ¬c = ⊥-elim (¬b (kl (suc l) (suc m) zero x))
+... | tri≈ ¬a b ¬c = cong suc (sm b)
+... | tri> ¬a ¬b c = ⊥-elim (¬b (kl (suc l) (suc m) zero x))
+kl (suc l) (suc m) (suc n) x = cong suc (kl l m n (sm x)) -- suc (kl l m n x)
 
+ks :(l m n : ℕ) → m ≡ n → l ≡ m ⊔ n
+ks l m n x with <-cmp m n
+ks zero zero zero x | tri< a ¬b ¬c = refl
+ks zero zero (suc n) x | tri< a ¬b ¬c = {!!}
+ks zero (suc m) n x | tri< a ¬b ¬c = {!!}
+ks (suc l) m n x | tri< a ¬b ¬c = {!!}
+... | tri≈ ¬a b ¬c = {!!}
+... | tri> ¬a ¬b c = {!!}
